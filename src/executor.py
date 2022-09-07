@@ -15,30 +15,22 @@ class PipelineExecutor:
         self._report: list[tuple[str, str]] = []
 
     def can_execute(self, component: Component) -> bool:
-        can = (len(self._pool) < self._n_cores and component.group == self._current_group) or len(self._pool) == 0
-        print(f"Can execute component {component.name}: {can}")
-        return can
+        return (len(self._pool) < self._n_cores and component.group == self._current_group) or len(self._pool) == 0
 
     def _is_finished(self, component: Component) -> bool:
-        done = self._time - self._component_start_times[component.name] >= component.execution_time
-        print(f"Component {component.name} done: {done}")
-        return done
+        return self._time - self._component_start_times[component.name] >= component.execution_time
 
     def add_component(self, component: Component):
-        print(f"Adding {component.name}")
         if not self.can_execute(component):
             raise RuntimeError(f"Cannot execute component {component} group: {self._current_group}), cores: {len(self._pool)}/{self._n_cores}")
         if len(self._pool) == 0:
-            print(f"Setting group to {component.group}")
             self._current_group = component.group
         self._pool.append(component)
         self._component_start_times[component.name] = self._time
 
     def cycle(self):
         self._time += 1
-        report_line = (",".join((t.name for t in self._pool)), self._current_group)
-        print(f"Cycling: {report_line}")
-        self._report.append(report_line)
+        self._report.append((",".join((t.name for t in self._pool)), self._current_group))
         done = []
         for i, comp in enumerate(self._pool):
             if self._is_finished(comp):
@@ -58,7 +50,6 @@ class PipelineExecutor:
     def get_report(self, save_to: Path = None, show: bool = True) -> list[tuple[str, str]]:
         rep_s = self._report_formatted()
         if save_to:
-            print(f"Saving report to {save_to}")
             save_to.parent.mkdir(parents=True, exist_ok=True)
             with open(save_to, 'w') as report_file:
                 report_file.write(rep_s)

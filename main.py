@@ -19,7 +19,6 @@ def main(pipeline_file: Path, target: str, n_cores: int, save_to: Path, show: bo
     if n_cores < 1:
         print(f"At least 1 CPU core required to calculate pipeline! Got: {n_cores}")
         exit(1)
-    print(f"OK! {pipeline_file} {n_cores}")
     save_location = save_to / (f"{n_cores}_" + pipeline_file.name.rstrip(".txt") + "_REPORT.txt")
 
     pipeline = MLPipeline.from_file(pipeline_definition=pipeline_file)
